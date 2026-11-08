@@ -1,10 +1,7 @@
-name: Android & Wear OS APK Build
+name: Android APK Build
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -18,23 +15,25 @@ jobs:
       - name: JDK 17 einrichten
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Gradle installieren
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
+          gradle-version: 8.7
 
-      - name: APKs bauen und Fehlerursache anzeigen
-        shell: bash
+      - name: APKs bauen
         run: |
-          set -o pipefail
-          if [ -f "Android_Studio_Kotlin_App/settings.gradle.kts" ]; then
+          if [ -d Android_Studio_Kotlin_App ]; then
             cd Android_Studio_Kotlin_App
           fi
+          gradle assembleDebug --console=plain
 
-          for MOD in app wear; do
-            if [ -d "$MOD/src/main/res" ]; then
-              mkdir -p "$MOD/src/main/res/mipmap"
-              ICON='<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewport
+      - name: APKs als Download speichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Coaching-APKs
+          path: |
+            **/build/outputs/apk/debug/*.apk
