@@ -16,23 +16,32 @@ jobs:
       - name: Code aus Repository auschecken
         uses: actions/checkout@v4
 
-      - name: Java JDK 17 einrichten
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
+    - name: Java JDK 17 einrichten
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'gradle'
 
-      - name: Zum Android-Projektverzeichnis wechseln & Gradle ausführen
-        working-directory: ./Android_Studio_Kotlin_App
-        run: |
+    - name: Gradle Wrapper auffinden und Build starten
+      run: |
+        # Suchen, wo sich gradlew im Projekt befindet und ausführen
+        if [ -f "Android_Studio_Kotlin_App/gradlew" ]; then
+          cd Android_Studio_Kotlin_App
           chmod +x gradlew
           ./gradlew clean assembleRelease
+        elif [ -f "./gradlew" ]; then
+          chmod +x gradlew
+          ./gradlew clean assembleRelease
+        else
+          echo "Fehler: gradlew wurde im Repository nicht gefunden!"
+          exit 1
+        fi
 
-      - name: Build-Artefakte (APK & AAB für Handy & Watch) sichern
-        uses: actions/upload-artifact@v4
-        with:
-          name: REMK-v25.9-Build-Artifacts
-          path: |
-            Android_Studio_Kotlin_App/app/build/outputs/apk/release/*.apk
-            Android_Studio_Kotlin_App/wear/build/outputs/apk/release/*.apk
+    - name: Build-Artefakte (APK & AAB für Handy & Watch) sichern
+      uses: actions/upload-artifact@v4
+      with:
+        name: REMK-v25.9-Build-Artifacts
+        path: |
+          **/build/outputs/apk/release/*.apk
+          **/build/outputs/aab/release/*.aab
