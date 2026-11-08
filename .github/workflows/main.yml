@@ -26,21 +26,19 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Smartphone- und Wear-OS-APK bauen
+      - name: Fehlende Standard-Icons automatisch ergänzen
         run: |
+          cd "${{ github.workspace }}"
           if [ -f "Android_Studio_Kotlin_App/settings.gradle.kts" ]; then
             cd Android_Studio_Kotlin_App
           fi
-          gradle :app:assembleDebug :wear:assembleDebug --stacktrace
-
-      - name: Smartphone-APK als Download bereitstellen
-        uses: actions/upload-artifact@v4
-        with:
-          name: Coaching-Phone-APK
-          path: "**/app/build/outputs/apk/debug/*.apk"
-
-      - name: Wear-OS-APK als Download bereitstellen
-        uses: actions/upload-artifact@v4
-        with:
-          name: Coaching-Wear-APK
-          path: "**/wear/build/outputs/apk/debug/*.apk"
+          for MOD in app wear; do
+            mkdir -p "$MOD/src/main/res/mipmap"
+            for ICON in ic_launcher ic_launcher_round; do
+              if [ ! -f "$MOD/src/main/res/mipmap/$ICON.xml" ]; then
+                cat << 'EOF' > "$MOD/src/main/res/mipmap/$ICON.xml"
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="
