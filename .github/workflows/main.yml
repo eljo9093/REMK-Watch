@@ -1,4 +1,4 @@
-name: RE:MK v25.9 App & Wear OS Watch Master Build
+name: Android & Wear OS APK Build
 
 on:
   push:
@@ -8,12 +8,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-apk-and-watch:
-    name: Build RE:MK v25.9 (Handy App + Wear OS Watch)
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Repository auschecken
         uses: actions/checkout@v4
 
       - name: JDK 17 einrichten
@@ -22,64 +21,29 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Gradle 8.5 einrichten
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.5'
+      - name: Android SDK einrichten
+        uses: android-actions/setup-android@v3
 
-      - name: Auto-Apply v25.9 (Logo, Watch-Assets, Widgets) & Release Build (Handy & Watch)
+      - name: Gradle installieren
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Smartphone- und Wear-OS-APK bauen
         run: |
-          # 1. Automatisch in das korrekte Android-Verzeichnis wechseln
           if [ -f "Android_Studio_Kotlin_App/settings.gradle.kts" ]; then
             cd Android_Studio_Kotlin_App
-          elif [ -f "REMK_Native_App_Projekt/Android_Studio_Kotlin_App/settings.gradle.kts" ]; then
-            cd REMK_Native_App_Projekt/Android_Studio_Kotlin_App
           fi
+          gradle :app:assembleDebug :wear:assembleDebug --stacktrace
 
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-
-          # 2. Python-Skript zur Logo-Extraktion und Asset-Vorbereitung für v25.9
-          python3 - << 'EOF'
-          import os, re, base64
-
-          html_path = "app/src/main/assets/index.html"
-          os.makedirs("app/src/main/res/drawable", exist_ok=True)
-          if os.path.exists(html_path):
-              with open(html_path, "r", encoding="utf-8") as f:
-                  html = f.read()
-              m = re.search(r'window\.REMK_LOGO_SRC\s*=\s*"data:image/[^;]+;base64,([^"]+)"', html)
-              if m:
-                  img_bytes = base64.b64decode(m.group(1))
-                  with open("app/src/main/res/drawable/ic_launcher.png", "wb") as img_f:
-                      img_f.write(img_bytes)
-                  with open("app/src/main/assets/icon-192.png", "wb") as img_f2:
-                      img_f2.write(img_bytes)
-                  with open("app/src/main/assets/icon-512.png", "wb") as img_f3:
-                      img_f3.write(img_bytes)
-                  print("✅ RE:MK-Logo erfolgreich als App-Icon extrahiert!")
-
-          # Widget-Layouts für v25.9 optimieren
-          for xml_info in ["remk_widget_info.xml", "remk_widget_workout_info.xml", "remk_widget_endurance_info.xml", "remk_widget_health_info.xml"]:
-              p = f"app/src/main/res/xml/{xml_info}"
-              if os.path.exists(p):
-                  with open(p, "r", encoding="utf-8") as f:
-                      x = f.read()
-                  x = x.replace('android:minHeight="110dp"', 'android:minHeight="150dp"')
-                  with open(p, "w", encoding="utf-8") as f:
-                      f.write(x)
-          EOF
-
-          # 3. Gradle Wrapper ausführbar machen und Release-Build für Handy (:app) UND Watch (:wear) starten
-          chmod +x gradlew
-          ./gradlew clean assembleRelease
-
-          # 4. APK-Dateien für den Upload vorbereiten
-          mkdir -p "$GITHUB_WORKSPACE/release_artifacts"
-          cp app/build/outputs/apk/release/*.apk "$GITHUB_WORKSPACE/release_artifacts/REMK-Handy-App-v25.9.apk" || true
-          cp wear/build/outputs/apk/release/*.apk "$GITHUB_WORKSPACE/release_artifacts/REMK-WearOS-Watch-v25.9.apk" || true
-
-      - name: Fertige RE:MK v25.9 APKs (Handy & Watch) hochladen
+      - name: Smartphone-APK als Download bereitstellen
         uses: actions/upload-artifact@v4
         with:
-          name: REMK-v25.9-Master-Build-Artifacts
-          path: release_artifacts/*.apk
+          name: Coaching-Phone-APK
+          path: "**/app/build/outputs/apk/debug/*.apk"
+
+      - name: Wear-OS-APK als Download bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Coaching-Wear-APK
+          path: "**/wear/build/outputs/apk/debug/*.apk"
