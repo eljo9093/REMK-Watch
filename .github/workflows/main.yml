@@ -23,29 +23,22 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Gradle Wrapper automatisch finden und Build starten
+      - name: In Android-Ordner wechseln und Gradle Build starten
         run: |
-          # Suche im gesamten Repository nach der gradlew-Datei
-          GRADLEW_PATH=$(find . -name "gradlew" -type f | head -n 1)
+          # Wechselt direkt in das Android-Verzeichnis, wo gradlew liegt
+          cd Android_Studio_Kotlin_App
           
-          if [ -z "$GRADLEW_PATH" ]; then
-            echo "❌ Fehler: 'gradlew' wurde im Repository nirgendwo gefunden!"
-            echo "Bitte stelle sicher, dass der Android-Ordner mitsamt gradlew in das Repository hochgeladen wurde."
-            exit 1
-          fi
-          
-          # In den Ordner wechseln, in dem gradlew liegt
-          TARGET_DIR=$(dirname "$GRADLEW_PATH")
-          echo "📁 Gradle-Verzeichnis gefunden unter: $TARGET_DIR"
-          cd "$TARGET_DIR"
-          
+          # Ausführungsrechte für den Gradle Wrapper setzen
           chmod +x gradlew
+          
+          # Handy-App & Wear OS Watch-Modul in einem Durchgang kompilieren
           ./gradlew clean assembleRelease
 
-      - name: Build-Artefakte (Handy APK & Watch APK) sichern
+      - name: Build-Artefakte (Handy APK & Watch APK) sicher speichern
         uses: actions/upload-artifact@v4
         with:
           name: REMK-v25.9-Build-Artifacts
           path: |
-            **/build/outputs/apk/release/*.apk
-            **/build/outputs/aab/release/*.aab
+            Android_Studio_Kotlin_App/app/build/outputs/apk/release/*.apk
+            Android_Studio_Kotlin_App/wear/build/outputs/apk/release/*.apk
+            Android_Studio_Kotlin_App/app/build/outputs/aab/release/*.aab
