@@ -2,9 +2,9 @@ name: RE:MK v25.9 App & Wear OS Watch Build
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -13,32 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Code aus Repository auschecken
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Java JDK 17 einrichten
+      - name: JDK 17 einrichten
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
 
-      - name: In Android-Ordner wechseln und Gradle Build starten
+      - name: In Android-Ordner wechseln und Build starten
         run: |
-          # Wechselt direkt in das Android-Verzeichnis, wo gradlew liegt
           cd Android_Studio_Kotlin_App
-          
-          # Ausführungsrechte für den Gradle Wrapper setzen
           chmod +x gradlew
-          
-          # Handy-App & Wear OS Watch-Modul in einem Durchgang kompilieren
           ./gradlew clean assembleRelease
 
-      - name: Build-Artefakte (Handy APK & Watch APK) sicher speichern
+      - name: Build-Artefakte (Handy APK & Watch APK) hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: REMK-v25.9-Build-Artifacts
+          name: REMK-v25.9-App-und-Watch-APKs
           path: |
             Android_Studio_Kotlin_App/app/build/outputs/apk/release/*.apk
             Android_Studio_Kotlin_App/wear/build/outputs/apk/release/*.apk
-            Android_Studio_Kotlin_App/app/build/outputs/aab/release/*.aab
