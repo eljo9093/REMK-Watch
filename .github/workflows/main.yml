@@ -1,4 +1,4 @@
-name: RE:MK App & Wear OS Watch Build
+name: RE:MK v25.9 App & Wear OS Watch Build
 
 on:
   push:
@@ -16,32 +16,32 @@ jobs:
       - name: Code aus Repository auschecken
         uses: actions/checkout@v4
 
-    - name: Java JDK 17 einrichten
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'gradle'
+      - name: Java JDK 17 einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
 
-    - name: Gradle Wrapper auffinden und Build starten
-      run: |
-        # Suchen, wo sich gradlew im Projekt befindet und ausführen
-        if [ -f "Android_Studio_Kotlin_App/gradlew" ]; then
-          cd Android_Studio_Kotlin_App
-          chmod +x gradlew
-          ./gradlew clean assembleRelease
-        elif [ -f "./gradlew" ]; then
-          chmod +x gradlew
-          ./gradlew clean assembleRelease
-        else
-          echo "Fehler: gradlew wurde im Repository nicht gefunden!"
-          exit 1
-        fi
+      - name: Gradle Wrapper ausführbar machen & Gradle Build starten
+        run: |
+          # Prüfen, ob der Ordner Android_Studio_Kotlin_App existiert
+          if [ -d "Android_Studio_Kotlin_App" ]; then
+            cd Android_Studio_Kotlin_App
+            chmod +x gradlew
+            ./gradlew clean assembleRelease
+          elif [ -f "gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew clean assembleRelease
+          else
+            echo "Fehler: Das Android-Projektverzeichnis oder gradlew wurde nicht gefunden!"
+            exit 1
+          fi
 
-    - name: Build-Artefakte (APK & AAB für Handy & Watch) sichern
-      uses: actions/upload-artifact@v4
-      with:
-        name: REMK-v25.9-Build-Artifacts
-        path: |
-          **/build/outputs/apk/release/*.apk
-          **/build/outputs/aab/release/*.aab
+      - name: Build-Artefakte (Handy APK & Watch APK) sicher speichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: REMK-v25.9-Build-Artifacts
+          path: |
+            **/build/outputs/apk/release/*.apk
+            **/build/outputs/aab/release/*.aab
