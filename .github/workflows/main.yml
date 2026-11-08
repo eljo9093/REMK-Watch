@@ -26,19 +26,15 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Fehlende Standard-Icons automatisch ergänzen
+      - name: APKs bauen und Fehlerursache anzeigen
+        shell: bash
         run: |
-          cd "${{ github.workspace }}"
+          set -o pipefail
           if [ -f "Android_Studio_Kotlin_App/settings.gradle.kts" ]; then
             cd Android_Studio_Kotlin_App
           fi
+
           for MOD in app wear; do
-            mkdir -p "$MOD/src/main/res/mipmap"
-            for ICON in ic_launcher ic_launcher_round; do
-              if [ ! -f "$MOD/src/main/res/mipmap/$ICON.xml" ]; then
-                cat << 'EOF' > "$MOD/src/main/res/mipmap/$ICON.xml"
-          <?xml version="1.0" encoding="utf-8"?>
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp"
-              android:height="108dp"
-              android:viewportWidth="
+            if [ -d "$MOD/src/main/res" ]; then
+              mkdir -p "$MOD/src/main/res/mipmap"
+              ICON='<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewport
