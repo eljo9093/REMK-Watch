@@ -23,22 +23,26 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Gradle Wrapper ausführbar machen & Gradle Build starten
+      - name: Gradle Wrapper automatisch finden und Build starten
         run: |
-          # Prüfen, ob der Ordner Android_Studio_Kotlin_App existiert
-          if [ -d "Android_Studio_Kotlin_App" ]; then
-            cd Android_Studio_Kotlin_App
-            chmod +x gradlew
-            ./gradlew clean assembleRelease
-          elif [ -f "gradlew" ]; then
-            chmod +x gradlew
-            ./gradlew clean assembleRelease
-          else
-            echo "Fehler: Das Android-Projektverzeichnis oder gradlew wurde nicht gefunden!"
+          # Suche im gesamten Repository nach der gradlew-Datei
+          GRADLEW_PATH=$(find . -name "gradlew" -type f | head -n 1)
+          
+          if [ -z "$GRADLEW_PATH" ]; then
+            echo "❌ Fehler: 'gradlew' wurde im Repository nirgendwo gefunden!"
+            echo "Bitte stelle sicher, dass der Android-Ordner mitsamt gradlew in das Repository hochgeladen wurde."
             exit 1
           fi
+          
+          # In den Ordner wechseln, in dem gradlew liegt
+          TARGET_DIR=$(dirname "$GRADLEW_PATH")
+          echo "📁 Gradle-Verzeichnis gefunden unter: $TARGET_DIR"
+          cd "$TARGET_DIR"
+          
+          chmod +x gradlew
+          ./gradlew clean assembleRelease
 
-      - name: Build-Artefakte (Handy APK & Watch APK) sicher speichern
+      - name: Build-Artefakte (Handy APK & Watch APK) sichern
         uses: actions/upload-artifact@v4
         with:
           name: REMK-v25.9-Build-Artifacts
