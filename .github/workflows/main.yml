@@ -1,0 +1,82 @@
+name: Build REMK 360° Pixel Watch 4 v37.22 Hyper-Chrono (App + 3 WatchFaces)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-watch-suite:
+    name: Build Pixel Watch 4 Suite (:wear + 3 WatchFaces v37.22)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle 8.5
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
+
+      - name: Auto-Clean & Compile Watch App + 3 System WatchFaces
+        shell: bash
+        run: |
+          WEAR_FILE=$(find . -name "build.gradle.kts" | grep "/wear/" | head -n 1)
+          if [ -n "$WEAR_FILE" ]; then
+            cd "$(dirname "$(dirname "$WEAR_FILE")")"
+          else
+            echo "ERROR: Android_Studio_Kotlin_App/wear/build.gradle.kts nicht gefunden! Bitte ZIP vorher entpacken."
+            exit 1
+          fi
+
+          # Auto-Clean: entferne alte XML-Duplikate neben neuen PNG-Ressourcen in allen WatchFace-Modulen
+          rm -f watchface/src/main/res/drawable/*.xml || true
+          rm -f watchface_radar/src/main/res/drawable/*.xml || true
+          rm -f watchface_status/src/main/res/drawable/*.xml || true
+
+          mkdir -p wear/src/main/java/eu/remk/coaching/wear
+          if [ -d "wear_kt_backup" ]; then
+            cp -f wear_kt_backup/*.kt wear/src/main/java/eu/remk/coaching/wear/ || true
+          fi
+
+          if [ ! -f "remk_watch_fixed.jks" ]; then
+            keytool -genkeypair -v -keystore remk_watch_fixed.jks -storetype PKCS12 -keyalg RSA -keysize 2048 -validity 10000 -alias remkwatch -storepass remkwatch2026 -keypass remkwatch2026 -dname "CN=REMK Coaching, OU=Watch, O=REMK, L=Kuenzelsau, C=DE"
+          fi
+
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+
+          mkdir -p "$GITHUB_WORKSPACE/watch_apk_out"
+
+          gradle :wear:assembleDebug --no-daemon
+          test -f wear/build/tmp/kotlin-classes/debug/eu/remk/coaching/wear/WearMainActivity.class
+          cp wear/build/outputs/apk/debug/wear-debug.apk "$GITHUB_WORKSPACE/watch_apk_out/1_REMK-Watch-App-v37-22-HyperChrono.apk"
+
+          if [ -d "watchface" ]; then
+            gradle :watchface:assembleDebug --no-daemon
+            cp watchface/build/outputs/apk/debug/watchface-debug.apk "$GITHUB_WORKSPACE/watch_apk_out/2_REMK-WatchFace-HyperChrono-v37-22.apk"
+          fi
+
+          if [ -d "watchface_radar" ]; then
+            gradle :watchface_radar:assembleDebug --no-daemon
+            cp watchface_radar/build/outputs/apk/debug/watchface_radar-debug.apk "$GITHUB_WORKSPACE/watch_apk_out/3_REMK-WatchFace-LVL-Radar-v37-22.apk"
+          fi
+
+          if [ -d "watchface_status" ]; then
+            gradle :watchface_status:assembleDebug --no-daemon
+            cp watchface_status/build/outputs/apk/debug/watchface_status-debug.apk "$GITHUB_WORKSPACE/watch_apk_out/4_REMK-WatchFace-StatusWindow-v37-22.apk"
+          fi
+
+      - name: Upload All 4 Pixel Watch 4 APKs (App + 3 WatchFaces)
+        uses: actions/upload-artifact@v4
+        with:
+          name: REMK-Pixel-Watch-4-HyperChrono-v37-22
+          path: watch_apk_out/*.apk
