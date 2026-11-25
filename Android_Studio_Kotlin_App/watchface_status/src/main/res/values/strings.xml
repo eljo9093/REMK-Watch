@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_face_name">RE:MK 360° Status-Window</string>
+    <string name="theme_color_name">Farbdesign</string>
+    <string name="theme_sport">Luminous Cyan</string>
+    <string name="theme_arctic">Arctic Eisblau</string>
+    <string name="slot_xp_name">RE:MK XP</string>
+    <string name="slot_kcal_name">RE:MK Kalorien</string>
+    <string name="slot_rank_name">RE:MK Level &amp; Rang</string>
+    <string name="slot_bars_name">RE:MK 6-Werte Status</string>
+    <string name="slot_water_name">RE:MK Wasser</string>
+</resources>

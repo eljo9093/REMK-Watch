@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher"
+        android:roundIcon="@drawable/ic_launcher"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
+        android:theme="@style/RemkWatchTheme">
+
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".WearMainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:stateNotNeeded="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/RemkWatchTheme"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- HINTERGRUND-PAUSEN-ALARM RECEIVER (MIT INTERAKTIVER BENACHRICHTIGUNG) -->
+        <receiver
+            android:name=".RestTimerReceiver"
+            android:exported="false" />
+
+        <!-- EXPLICIT LAUNCH HELPER ACTIVITIES (NUR FÜR NOTIFICATION-OK & TITEL-SPRUNG) -->
+        <activity android:name=".TileLogSetActivity" android:exported="true" android:theme="@android:style/Theme.NoDisplay" android:excludeFromRecents="true" android:noHistory="true" />
+        <activity android:name=".TileOpenWorkoutActivity" android:exported="true" android:theme="@android:style/Theme.NoDisplay" android:excludeFromRecents="true" android:noHistory="true" />
+        <activity android:name=".TileOpenNutritionActivity" android:exported="true" android:theme="@android:style/Theme.NoDisplay" android:excludeFromRecents="true" android:noHistory="true" />
+        <activity android:name=".TileOpenCardioActivity" android:exported="true" android:theme="@android:style/Theme.NoDisplay" android:excludeFromRecents="true" android:noHistory="true" />
+
+        <!-- 4 DIRECT-ACTION WEAR OS 5 HOME-KACHELN (OHNE COCKPIT-KACHEL) -->
+        <service
+            android:name=".RemkTileService"
+            android:exported="true"
+            android:label="RE:MK 1. Kraft"
+            android:description="@string/tile_description"
+            android:icon="@drawable/ic_tile_kraft"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+                <action android:name="androidx.wear.tiles.action.BIND_UPDATE_REQUESTER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".RemkTimerTileService"
+            android:exported="true"
+            android:label="RE:MK 2. Timer"
+            android:description="@string/tile_description"
+            android:icon="@drawable/ic_tile_timer"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+                <action android:name="androidx.wear.tiles.action.BIND_UPDATE_REQUESTER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".RemkNutritionTileService"
+            android:exported="true"
+            android:label="RE:MK 3. Makros"
+            android:description="@string/tile_description"
+            android:icon="@drawable/ic_tile_nutrition"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+                <action android:name="androidx.wear.tiles.action.BIND_UPDATE_REQUESTER" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".RemkCardioShopTileService"
+            android:exported="true"
+            android:label="RE:MK 4. Cardio"
+            android:description="@string/tile_description"
+            android:icon="@drawable/ic_tile_cardio"
+            android:permission="com.google.android.wearable.permission.BIND_TILE_PROVIDER">
+            <intent-filter>
+                <action android:name="androidx.wear.tiles.action.BIND_TILE_PROVIDER" />
+                <action android:name="androidx.wear.tiles.action.BIND_UPDATE_REQUESTER" />
+            </intent-filter>
+        </service>
+
+        <!-- 8 NATIVE WEAR OS 5 KOMPLIKATIONEN FÜR ALLE 3 RE:MK WATCHFACES -->
+        <service
+            android:name=".RemkRadarImageComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK 6-Achsen-Radar"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SMALL_IMAGE" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkStatusBarsImageComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK 6-Werte Status"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SMALL_IMAGE" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkLevelXpComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK XP &amp; Level"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="RANGED_VALUE,SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkRankBadgeComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK Rang-Badge"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkSetsComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK Sätze"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="RANGED_VALUE,SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkKcalComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_nutrition"
+            android:label="RE:MK Kalorien"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="RANGED_VALUE,SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkWaterComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_nutrition"
+            android:label="RE:MK Wasser"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="RANGED_VALUE,SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="300" />
+        </service>
+
+        <service
+            android:name=".RemkActiveSetComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_kraft"
+            android:label="RE:MK Aktiver Satz"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data android:name="android.support.wearable.complications.SUPPORTED_TYPES" android:value="SHORT_TEXT" />
+            <meta-data android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS" android:value="60" />
+        </service>
+    </application>
+</manifest>

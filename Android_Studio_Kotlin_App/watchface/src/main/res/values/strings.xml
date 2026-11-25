@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watch_face_name">RE:MK 360° Hyper-Chrono</string>
+    <string name="theme_color_name">Farbdesign</string>
+    <string name="theme_sport">Luminous Sport</string>
+    <string name="theme_arctic">Arctic Alltag (Weiß/Eisblau)</string>
+    <string name="theme_minimal">Minimal Business</string>
+    <string name="slot_sets_name">RE:MK Sätze</string>
+    <string name="slot_kcal_name">RE:MK Kalorien</string>
+    <string name="slot_water_name">RE:MK Wasser</string>
+    <string name="slot_rank_name">RE:MK Level &amp; Rang</string>
+    <string name="slot_workout_name">RE:MK Aktiver Satz</string>
+</resources>
